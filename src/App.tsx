@@ -97,7 +97,7 @@ export default function App() {
   }
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-slate-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-slate-50 print:h-auto print:overflow-visible print:bg-white">
       <header className="no-print h-16 bg-white border-b border-slate-200 flex items-center justify-between px-6 z-50 shrink-0">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center shadow-lg shadow-rose-200">
@@ -117,7 +117,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden print:overflow-visible">
         <aside className="no-print w-[480px] bg-white border-r border-slate-200 flex flex-col shrink-0 relative shadow-2xl z-40">
           <div className="flex border-b border-slate-100 bg-slate-50/50">
             <button 
@@ -263,8 +263,8 @@ export default function App() {
           </div>
         </aside>
 
-        <main className="print-area flex-1 bg-slate-100 overflow-y-auto p-12 relative">
-          <div className="flex flex-col items-center">
+        <main className="print-area flex-1 bg-slate-100 overflow-y-auto p-12 relative print:overflow-visible print:p-0 print:bg-white">
+          <div className="flex flex-col items-center print:block">
             {items.length === 0 ? (
               <div className="mt-32 text-center max-w-sm">
                 <div className="w-20 h-20 bg-slate-200 rounded-full flex items-center justify-center mx-auto mb-4">
