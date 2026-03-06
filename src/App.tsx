@@ -12,6 +12,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'import' | 'config' | 'edit'>('import');
   const [items, setItems] = useState<StickerItem[]>([]);
   const [pasteData, setPasteData] = useState('');
+  const [filterCodes, setFilterCodes] = useState('');
   const [globalPromoName, setGlobalPromoName] = useState('SIÊU SALE GIÁ SỐC');
   const [globalDate, setGlobalDate] = useState('');
 
@@ -28,24 +29,24 @@ export default function App() {
   const processPasteData = () => {
     const rawText = pasteData.trim();
     if (!rawText) {
-      alert("Vui lòng dán dữ liệu vào ô trống!");
+      alert("Vui lòng dán dữ liệu tổng vào ô trống!");
       return;
     }
 
     const lines = rawText.split('\n');
-    const newItems: StickerItem[] = [];
+    const parsedItems: StickerItem[] = [];
 
     lines.forEach(line => {
       const cols = line.split('\t');
       if (cols.length >= 1) {
-        const code = (cols[0] || '').trim();
+        const code = (cols[0] || '').trim().toUpperCase();
         const name = (cols[1] || '').trim();
         const price = (cols[2] || '').trim();
         const promo = (cols[3] || '').trim();
 
         if (code || name) {
-          newItems.push({
-            code: code.toUpperCase() || 'SKU',
+          parsedItems.push({
+            code: code || 'SKU',
             name: name || 'Sản phẩm mới',
             price: cleanNumber(price),
             promoInput: promo
@@ -54,9 +55,43 @@ export default function App() {
       }
     });
 
-    if (newItems.length > 0) {
-      setItems(newItems);
+    let finalItems = parsedItems;
+
+    // Filter logic
+    const filterText = filterCodes.trim();
+    if (filterText) {
+      // Split by newline or comma, and remove empty strings
+      const codesToPrint = filterText
+        .split(/[\n,]+/)
+        .map(c => c.trim().toUpperCase())
+        .filter(c => c.length > 0);
+
+      if (codesToPrint.length > 0) {
+        finalItems = [];
+        const itemMap = new Map<string, StickerItem>();
+        
+        // Build a map of the master data (keep the first occurrence of each SKU)
+        parsedItems.forEach(item => {
+          if (!itemMap.has(item.code)) {
+            itemMap.set(item.code, item);
+          }
+        });
+
+        // Match requested codes with the master data
+        // This also allows printing multiple copies if a code is pasted multiple times
+        codesToPrint.forEach(code => {
+          if (itemMap.has(code)) {
+            finalItems.push({ ...itemMap.get(code)! });
+          }
+        });
+      }
+    }
+
+    if (finalItems.length > 0) {
+      setItems(finalItems);
       setActiveTab('edit');
+    } else {
+      alert("Không tìm thấy sản phẩm nào khớp với danh sách mã cần in!");
     }
   };
 
@@ -144,20 +179,32 @@ export default function App() {
             {activeTab === 'import' && (
               <div className="space-y-4 animate-in fade-in duration-200">
                 <div className="bg-blue-50 border border-blue-100 p-4 rounded-2xl">
-                  <h4 className="text-[11px] font-black text-blue-700 uppercase mb-1">Cách dán dữ liệu:</h4>
+                  <h4 className="text-[11px] font-black text-blue-700 uppercase mb-1">Bước 1: Dán dữ liệu tổng</h4>
                   <ol className="text-[11px] text-blue-600 space-y-1 list-decimal ml-4 font-medium">
                     <li>Bôi đen 4 cột trong Excel: <b>Mã, Tên, Giá gốc, Giá KM</b></li>
-                    <li>Ctrl + C để copy</li>
-                    <li>Ctrl + V vào ô bên dưới rồi nhấn <b>XỬ LÝ</b></li>
+                    <li>Ctrl + C để copy và Ctrl + V vào ô bên dưới</li>
                   </ol>
                 </div>
 
                 <textarea 
-                  rows={12} 
+                  rows={8} 
                   value={pasteData}
                   onChange={(e) => setPasteData(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 text-[12px] font-mono focus:border-rose-500 focus:bg-white outline-none transition-all"
-                  placeholder="Dán nội dung từ Excel tại đây..."
+                  placeholder="Dán dữ liệu tổng từ Excel tại đây..."
+                />
+
+                <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl">
+                  <h4 className="text-[11px] font-black text-emerald-700 uppercase mb-1">Bước 2: Lọc mã cần in (Tùy chọn)</h4>
+                  <p className="text-[11px] text-emerald-600 font-medium">Dán danh sách các mã SKU cần in (mỗi mã 1 dòng hoặc cách nhau bởi dấu phẩy). Bỏ trống nếu muốn in tất cả.</p>
+                </div>
+
+                <textarea 
+                  rows={4} 
+                  value={filterCodes}
+                  onChange={(e) => setFilterCodes(e.target.value)}
+                  className="w-full bg-slate-50 border-2 border-dashed border-slate-200 rounded-2xl p-4 text-[12px] font-mono focus:border-emerald-500 focus:bg-white outline-none transition-all"
+                  placeholder="VD: SKU001, SKU002..."
                 />
 
                 <div className="flex gap-2">
@@ -165,10 +212,10 @@ export default function App() {
                     onClick={processPasteData} 
                     className="flex-1 bg-rose-600 hover:bg-rose-700 text-white font-bold py-4 rounded-2xl shadow-lg transition-all active:scale-95"
                   >
-                    XỬ LÝ DỮ LIỆU
+                    XỬ LÝ & LỌC DỮ LIỆU
                   </button>
                   <button 
-                    onClick={() => setPasteData('')} 
+                    onClick={() => { setPasteData(''); setFilterCodes(''); }} 
                     className="px-4 bg-slate-100 text-slate-400 hover:text-rose-600 rounded-2xl font-bold text-xs uppercase transition-colors"
                   >
                     Xóa
