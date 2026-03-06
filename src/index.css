@@ -1,0 +1,90 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f8fafc;
+}
+
+:root {
+  --brand-primary: #e11d48;
+  --brand-dark: #1e293b;
+}
+
+/* Vùng hiển thị xem trước trên màn hình */
+.page-preview {
+  width: 210mm;
+  min-height: 297mm;
+  background: white;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  margin: 0 auto 30px;
+  padding: 10mm;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(3, 88mm);
+  gap: 5mm;
+  border-radius: 4px;
+  box-sizing: border-box;
+  page-break-after: always;
+}
+
+.sticker {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.pattern-bg {
+  background-image: radial-gradient(#e11d48 0.5px, transparent 0.5px);
+  background-size: 10px 10px;
+  opacity: 0.03;
+}
+
+/* THIẾT LẬP ĐẶC BIỆT KHI IN */
+@media print {
+  @page { 
+      size: A4; 
+      margin: 0; 
+  }
+  html, body {
+      width: 210mm;
+      height: 297mm;
+      margin: 0 !important;
+      padding: 0 !important;
+      background: white !important;
+  }
+  .no-print { display: none !important; }
+  .print-area { 
+      display: block !important; 
+      padding: 0 !important; 
+      margin: 0 !important;
+      width: 210mm !important;
+      height: auto !important;
+      overflow: visible !important;
+  }
+  .page-preview { 
+      box-shadow: none !important; 
+      margin: 0 !important; 
+      padding: 10mm !important; 
+      border: none !important;
+      width: 210mm !important;
+      height: 297mm !important;
+      page-break-after: always !important;
+      display: grid !important;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+  }
+  .sticker { 
+      border: 1px dashed #e11d48 !important; 
+      box-shadow: none !important;
+  }
+}
